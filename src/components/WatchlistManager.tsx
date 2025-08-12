@@ -3,7 +3,6 @@ import React, { useState, useCallback, useMemo } from "react";
 import {
   View,
   Text,
-  Modal,
   TouchableOpacity,
   FlatList,
   TextInput,
@@ -19,8 +18,9 @@ import {
   selectAllWatchlists,
   initializeDefaultWatchlist,
 } from "../store/slices/watchlistSlice";
-import { Plus, X, Check, Folder } from "lucide-react-native";
-
+import { Plus, X, Check, Folder, Bookmark } from "lucide-react-native";
+import Modal from "react-native-modal";
+import { wp } from "../utils/responsive";
 interface WatchlistManagerProps {
   visible: boolean;
   onClose: () => void;
@@ -171,7 +171,10 @@ const WatchlistManager: React.FC<WatchlistManagerProps> = ({
           <View style={styles.watchlistItemContent}>
             <View style={styles.watchlistInfo}>
               <View style={styles.watchlistIcon}>
-                <Folder size={16} color={showSuccess ? "#34C759" : "#3C3C43"} />
+                <Bookmark
+                  size={16}
+                  color={showSuccess ? "#34C759" : "#3C3C43"}
+                />
               </View>
               <View>
                 <Text
@@ -210,122 +213,122 @@ const WatchlistManager: React.FC<WatchlistManagerProps> = ({
 
   return (
     <Modal
-      visible={visible}
-      transparent
-      animationType="slide"
-      onRequestClose={onClose}
+      isVisible={visible}
+      animationIn="slideInUp"
+      animationOut="slideOutDown"
+      useNativeDriverForBackdrop={true}
+      swipeDirection={"down"}
+      swipeThreshold={200}
+      propagateSwipe={true}
       onShow={handleModalShow}
+      onBackdropPress={onClose}
+      style={{
+        justifyContent: "center",
+        alignItems: "center",
+      }}
     >
-      <View style={styles.modalContainer}>
-        <TouchableOpacity
-          style={styles.backdrop}
-          activeOpacity={1}
-          onPress={onClose}
-        />
-
-        <View style={styles.modalContent}>
-          {/* Header */}
-          <View style={styles.header}>
-            <View>
-              <Text style={styles.title}>Add to Watchlist</Text>
-              <Text style={styles.subtitle}>
-                {symbol} • {companyName}
-              </Text>
-            </View>
-            <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-              <X size={20} color="#3C3C43" />
-            </TouchableOpacity>
-          </View>
-
-          {/* Create New Watchlist */}
-          <View style={styles.createSection}>
-            <Text style={styles.sectionTitle}>Create New Watchlist</Text>
-            <View style={styles.inputContainer}>
-              <TextInput
-                style={styles.input}
-                placeholder="Enter watchlist name"
-                value={newWatchlistName}
-                onChangeText={setNewWatchlistName}
-                onSubmitEditing={handleCreateWatchlist}
-                returnKeyType="done"
-              />
-              <TouchableOpacity
-                style={[
-                  styles.createButton,
-                  isCreating && styles.createButtonLoading,
-                ]}
-                onPress={handleCreateWatchlist}
-                disabled={isCreating || !newWatchlistName.trim()}
-              >
-                {isCreating ? (
-                  <Check size={18} color="#fff" />
-                ) : (
-                  <Plus size={18} color="#fff" />
-                )}
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          {/* Watchlists Section */}
-          <View style={styles.watchlistsSection}>
-            <Text style={styles.sectionTitle}>
-              Your Watchlists ({watchlists?.length || 0})
+      <View style={styles.modalContent}>
+        {/* Header */}
+        <View style={styles.header}>
+          <View>
+            <Text style={styles.title}>Add to Watchlist</Text>
+            <Text style={styles.subtitle}>
+              {symbol} • {companyName}
             </Text>
-
-            <View style={styles.watchlistsList}>
-              {!watchlists ? (
-                <View style={styles.emptyState}>
-                  <Folder size={32} color="#8E8E93" />
-                  <Text style={styles.emptyTitle}>Loading watchlists...</Text>
-                  <Text style={styles.emptySubtext}>
-                    Please wait while we load your watchlists
-                  </Text>
-                </View>
-              ) : !Array.isArray(watchlists) ? (
-                <View style={styles.emptyState}>
-                  <Text style={styles.emptyTitle}>Data Error</Text>
-                  <Text style={styles.emptySubtext}>
-                    Watchlists data is not in expected format
-                  </Text>
-                </View>
-              ) : watchlists.length === 0 ? (
-                <View style={styles.emptyState}>
-                  <Folder size={32} color="#8E8E93" />
-                  <Text style={styles.emptyTitle}>No Watchlists Yet</Text>
-                  <Text style={styles.emptySubtext}>
-                    Create your first watchlist using the form above
-                  </Text>
-                </View>
-              ) : (
-                <FlatList
-                  data={watchlists}
-                  keyExtractor={(item, index) => {
-                    const key = item?.id || `fallback-${index}`;
-                    return key;
-                  }}
-                  renderItem={renderWatchlistItem}
-                  showsVerticalScrollIndicator={false}
-                  extraData={[
-                    watchlistsWithStock,
-                    addedToWatchlists,
-                    watchlists?.length,
-                  ]}
-                  initialNumToRender={10}
-                  maxToRenderPerBatch={10}
-                  windowSize={10}
-                  removeClippedSubviews={false}
-                  contentContainerStyle={{ paddingBottom: 16 }}
-                />
-              )}
-            </View>
           </View>
+          <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+            <X size={20} color="#3C3C43" />
+          </TouchableOpacity>
+        </View>
 
-          {/* Footer Actions */}
-          <View style={styles.footer}>
-            <TouchableOpacity style={styles.doneButton} onPress={onClose}>
-              <Text style={styles.doneButtonText}>Done</Text>
+        {/* Create New Watchlist */}
+        <View style={styles.createSection}>
+          <Text style={styles.sectionTitle}>Create New Watchlist</Text>
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter watchlist name"
+              value={newWatchlistName}
+              onChangeText={setNewWatchlistName}
+              onSubmitEditing={handleCreateWatchlist}
+              returnKeyType="done"
+            />
+            <TouchableOpacity
+              style={[
+                styles.createButton,
+                isCreating && styles.createButtonLoading,
+              ]}
+              onPress={handleCreateWatchlist}
+              disabled={isCreating || !newWatchlistName.trim()}
+            >
+              {isCreating ? (
+                <Check size={18} color="#fff" />
+              ) : (
+                <Plus size={18} color="#fff" />
+              )}
             </TouchableOpacity>
           </View>
+        </View>
+
+        {/* Watchlists Section */}
+        <View style={styles.watchlistsSection}>
+          <Text style={styles.sectionTitle}>
+            Your Watchlists ({watchlists?.length || 0})
+          </Text>
+
+          <View style={styles.watchlistsList}>
+            {!watchlists ? (
+              <View style={styles.emptyState}>
+                <Folder size={32} color="#8E8E93" />
+                <Text style={styles.emptyTitle}>Loading watchlists...</Text>
+                <Text style={styles.emptySubtext}>
+                  Please wait while we load your watchlists
+                </Text>
+              </View>
+            ) : !Array.isArray(watchlists) ? (
+              <View style={styles.emptyState}>
+                <Text style={styles.emptyTitle}>Data Error</Text>
+                <Text style={styles.emptySubtext}>
+                  Watchlists data is not in expected format
+                </Text>
+              </View>
+            ) : watchlists.length === 0 ? (
+              <View style={styles.emptyState}>
+                <Folder size={32} color="#8E8E93" />
+                <Text style={styles.emptyTitle}>No Watchlists Yet</Text>
+                <Text style={styles.emptySubtext}>
+                  Create your first watchlist using the form above
+                </Text>
+              </View>
+            ) : (
+              <FlatList
+                data={watchlists}
+                keyExtractor={(item, index) => {
+                  const key = item?.id || `fallback-${index}`;
+                  return key;
+                }}
+                renderItem={renderWatchlistItem}
+                showsVerticalScrollIndicator={false}
+                extraData={[
+                  watchlistsWithStock,
+                  addedToWatchlists,
+                  watchlists?.length,
+                ]}
+                initialNumToRender={10}
+                maxToRenderPerBatch={10}
+                windowSize={10}
+                removeClippedSubviews={false}
+                contentContainerStyle={{ paddingBottom: 16 }}
+              />
+            )}
+          </View>
+        </View>
+
+        {/* Footer Actions */}
+        <View style={styles.footer}>
+          <TouchableOpacity style={styles.doneButton} onPress={onClose}>
+            <Text style={styles.doneButtonText}>Done</Text>
+          </TouchableOpacity>
         </View>
       </View>
     </Modal>
@@ -333,18 +336,6 @@ const WatchlistManager: React.FC<WatchlistManagerProps> = ({
 };
 
 const styles = StyleSheet.create({
-  modalContainer: {
-    flex: 1,
-    justifyContent: "flex-end",
-  },
-  backdrop: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
   modalContent: {
     backgroundColor: "#FFFFFF",
     borderTopLeftRadius: 20,
@@ -354,6 +345,10 @@ const styles = StyleSheet.create({
     paddingTop: 8,
     display: "flex",
     flexDirection: "column",
+    width: wp(100),
+    justifyContent: "center",
+    position: "absolute",
+    bottom: 0,
   },
   header: {
     flexDirection: "row",

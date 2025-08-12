@@ -27,6 +27,7 @@ import {
 import { Heart, Plus } from "lucide-react-native";
 import WatchlistManager from "../src/components/WatchlistManager";
 import { LinearGradient } from "expo-linear-gradient";
+import { wp } from "../src/utils/responsive";
 
 const { width } = Dimensions.get("window");
 
@@ -128,6 +129,9 @@ const StockDetailsScreen = () => {
   const handleWatchlistManagerClose = () => {
     setShowWatchlistManager(false);
   };
+  const processedLabels = chartData?.labels.map((label, i) =>
+    i % 12 === 0 ? label : ""
+  );
 
   return (
     <SafeAreaView style={styles.container}>
@@ -212,32 +216,36 @@ const StockDetailsScreen = () => {
         {chartData && (
           <View style={styles.chartContainer}>
             <LineChart
-              data={chartData}
-              width={width - 40}
+              data={{
+                labels: processedLabels,
+                datasets: [{ data: chartData.datasets[0].data }],
+              }}
+              width={width - 60}
               height={220}
               chartConfig={{
                 backgroundColor: "transparent",
                 backgroundGradientFrom: "#fff",
                 backgroundGradientTo: "#fff",
-                decimalPlaces: 0,
+                decimalPlaces: 2,
                 color: () =>
                   isPositive ? "rgba(52, 199, 89, 1)" : "rgba(255, 59, 48, 1)",
-                labelColor: () => "rgba(0, 0, 0, 0.7)",
+                labelColor: () => "#000",
                 propsForDots: { r: "0" },
                 propsForBackgroundLines: { stroke: "transparent" },
-                formatYLabel: (value) => `$${parseInt(value)}`,
+                propsForLabels: { fontSize: 12, fontWeight: "700" },
+                formatYLabel: (value) => `$${parseFloat(value).toFixed(2)}`,
               }}
-              bezier
-              style={{
-                marginVertical: 8,
-                borderRadius: 8,
-              }}
-              withHorizontalLabels={true} // show price labels
-              withVerticalLabels={true} // show date labels
+              style={{ marginHorizontal: 20 }}
               withDots={false}
               withShadow={false}
               withInnerLines={false}
               withOuterLines={false}
+              withHorizontalLabels={true}
+              withVerticalLabels={true}
+              segments={8} // fewer Y-axis segments
+              // formatXLabel={(value) => value}
+              xLabelsOffset={1}
+              fromZero
             />
           </View>
         )}
@@ -326,7 +334,7 @@ const formatMarketCap = (marketCap) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#FFFFFF", // pure white bg
   },
   scrollView: {
     flex: 1,
@@ -341,9 +349,9 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     marginTop: 12,
-    fontSize: 15,
-    color: "#3C3C43",
-    fontWeight: "400",
+    fontSize: 16,
+    color: "#000000",
+    fontWeight: "700",
   },
   errorContainer: {
     flex: 1,
@@ -353,20 +361,28 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 16,
-    color: "#3C3C43",
+    color: "#000",
     textAlign: "center",
     marginBottom: 20,
+    fontWeight: "700",
   },
   retryButton: {
-    backgroundColor: "#000000",
+    backgroundColor: "#00BBF9", // cyan accent
     paddingHorizontal: 24,
     paddingVertical: 12,
-    borderRadius: 8,
+    borderRadius: 0,
+    borderWidth: 3,
+    borderColor: "#000",
+    shadowColor: "#000",
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
   },
   retryText: {
-    color: "#FFFFFF",
-    fontSize: 15,
-    fontWeight: "500",
+    color: "#000000",
+    fontSize: 16,
+    fontWeight: "900",
+    letterSpacing: 1,
   },
   header: {
     flexDirection: "row",
@@ -375,147 +391,206 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 10,
+    borderBottomWidth: 4,
+    borderBottomColor: "#000",
   },
   backButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "#F2F2F7",
+    width: 44,
+    height: 44,
+    backgroundColor: "#000",
     justifyContent: "center",
     alignItems: "center",
+    borderWidth: 3,
+    borderColor: "#00BBF9", // cyan border
+    borderRadius: 0,
   },
   backText: {
-    fontSize: 20,
-    color: "#3C3C43",
-    fontWeight: "300",
+    fontSize: 26,
+    color: "#00BBF9", // cyan text
+    fontWeight: "900",
+    lineHeight: 26,
   },
   watchlistButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "#F2F2F7",
+    width: 44,
+    height: 44,
+    backgroundColor: "#FFFFFF",
     justifyContent: "center",
     alignItems: "center",
+    borderWidth: 3,
+    borderColor: "#000",
+    borderRadius: 0,
+    shadowColor: "#000",
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
   },
   stockInfo: {
     paddingHorizontal: 20,
     paddingVertical: 20,
+    borderBottomWidth: 4,
+    borderBottomColor: "#000",
   },
   symbol: {
-    fontSize: 28,
-    fontWeight: "700",
-    color: "#000000",
-    letterSpacing: -0.5,
+    fontSize: 32,
+    fontWeight: "900",
+    color: "#000",
+    letterSpacing: -1,
   },
   companyName: {
-    fontSize: 16,
-    color: "#8E8E93",
-    marginTop: 4,
-    fontWeight: "400",
+    fontSize: 18,
+    color: "#000",
+    marginTop: 6,
+    fontWeight: "700",
   },
   priceSection: {
-    marginTop: 24,
+    marginTop: 28,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-start",
+    gap: 20,
   },
   currentPrice: {
-    fontSize: 40,
-    fontWeight: "300",
-    color: "#000000",
+    fontSize: 44,
+    fontWeight: "900",
+    color: "#000",
     letterSpacing: -1,
   },
   changeContainer: {
-    marginTop: 4,
+    borderWidth: 3,
+    borderColor: "#000",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 0,
   },
   change: {
-    fontSize: 16,
-    fontWeight: "500",
+    fontSize: 18,
+    fontWeight: "900",
+    letterSpacing: 0.5,
   },
   timeRangeContainer: {
     flexDirection: "row",
     paddingHorizontal: 20,
-    marginBottom: 20,
+    marginVertical: 20,
   },
   timeButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    marginRight: 8,
-    borderRadius: 16,
-    backgroundColor: "#F2F2F7",
+    paddingHorizontal: 18,
+    paddingVertical: 10,
+    marginRight: 10,
+    borderRadius: 0,
+    backgroundColor: "#fff",
+    borderWidth: 3,
+    borderColor: "#000",
+    shadowColor: "#000",
+    shadowOffset: { width: 3, height: 3 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
   },
   activeTimeButton: {
-    backgroundColor: "#000000",
+    backgroundColor: "#00BBF9",
+    borderColor: "#000",
   },
   timeButtonText: {
-    fontSize: 14,
-    color: "#3C3C43",
-    fontWeight: "500",
+    fontSize: 16,
+    color: "#000",
+    fontWeight: "700",
+    letterSpacing: 1,
   },
   activeTimeButtonText: {
-    color: "#FFFFFF",
+    color: "#000",
   },
   chartContainer: {
     alignItems: "center",
-    marginBottom: 30,
+    marginBottom: 40,
+    borderWidth: 4,
+    borderColor: "#000",
+    padding: 12,
+    borderRadius: 0,
+    shadowColor: "#000",
+    shadowOffset: { width: 6, height: 6 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    backgroundColor: "#fff",
+    paddingHorizontal: 20,
+    width: wp(90),
+    alignSelf: "center",
   },
   chart: {
     borderRadius: 0,
   },
   metricsContainer: {
     paddingHorizontal: 20,
-    marginBottom: 30,
+    marginBottom: 40,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#000000",
-    marginBottom: 16,
+    fontSize: 20,
+    fontWeight: "900",
+    color: "#000",
+    marginBottom: 20,
+    letterSpacing: 1,
   },
   metricsList: {
-    backgroundColor: "#F2F2F7",
-    borderRadius: 12,
-    paddingVertical: 4,
+    backgroundColor: "#fff",
+    borderRadius: 0,
+    borderWidth: 3,
+    borderColor: "#000",
+    shadowColor: "#000",
+    shadowOffset: { width: 5, height: 5 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
   },
   metricRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: 18,
+    paddingVertical: 14,
+    borderBottomWidth: 3,
+    borderBottomColor: "#000",
   },
   metricLabel: {
-    fontSize: 15,
-    color: "#3C3C43",
-    fontWeight: "400",
+    fontSize: 16,
+    color: "#000",
+    fontWeight: "700",
+    letterSpacing: 0.5,
   },
   metricValue: {
-    fontSize: 15,
-    color: "#000000",
-    fontWeight: "500",
+    fontSize: 16,
+    color: "#000",
+    fontWeight: "900",
   },
   detailsContainer: {
     paddingHorizontal: 20,
-    marginBottom: 30,
+    marginBottom: 40,
   },
   detailsList: {
-    backgroundColor: "#F2F2F7",
-    borderRadius: 12,
-    paddingVertical: 4,
+    backgroundColor: "#fff",
+    borderRadius: 0,
+    borderWidth: 3,
+    borderColor: "#000",
+    shadowColor: "#000",
+    shadowOffset: { width: 5, height: 5 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
   },
   detailRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: 18,
+    paddingVertical: 14,
+    borderBottomWidth: 3,
+    borderBottomColor: "#000",
   },
   detailLabel: {
-    fontSize: 15,
-    color: "#3C3C43",
-    fontWeight: "400",
+    fontSize: 16,
+    color: "#000",
+    fontWeight: "700",
+    letterSpacing: 0.5,
   },
   detailValue: {
-    fontSize: 15,
-    color: "#000000",
-    fontWeight: "500",
+    fontSize: 16,
+    color: "#000",
+    fontWeight: "900",
     textAlign: "right",
     flex: 1,
     marginLeft: 16,
@@ -525,10 +600,10 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   description: {
-    fontSize: 15,
-    color: "#3C3C43",
-    lineHeight: 22,
-    fontWeight: "400",
+    fontSize: 16,
+    color: "#000",
+    lineHeight: 24,
+    fontWeight: "700",
   },
 });
 

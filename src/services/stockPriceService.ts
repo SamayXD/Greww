@@ -2,7 +2,7 @@
 import axios from "axios";
 import fallbackData from "../utils/fallbackData";
 
-const API_KEY = "AFC6B4JNQWEUYGQI";
+const API_KEY = "VRRHSA582DCX1JSX";
 const BASE_URL = "https://www.alphavantage.co/query";
 
 export const stockPriceService = {

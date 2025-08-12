@@ -29,7 +29,9 @@ const WatchListScreen = () => {
   const watchlists = useSelector(selectAllWatchlists);
   const defaultWatchlist = useSelector(selectDefaultWatchlist);
   const dispatch = useDispatch();
-  const [expandedWatchlists, setExpandedWatchlists] = useState<{[key: string]: boolean}>({});
+  const [expandedWatchlists, setExpandedWatchlists] = useState<{
+    [key: string]: boolean;
+  }>({});
 
   // Initialize default watchlist on component mount if none exists
   useEffect(() => {
@@ -38,10 +40,10 @@ const WatchListScreen = () => {
 
   const toggleWatchlist = (watchlistId: string) => {
     if (!watchlistId) return;
-    
-    setExpandedWatchlists(prev => ({
+
+    setExpandedWatchlists((prev) => ({
       ...prev,
-      [watchlistId]: !prev[watchlistId]
+      [watchlistId]: !prev[watchlistId],
     }));
   };
 
@@ -180,45 +182,45 @@ export default WatchListScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FAFAFA",
+    backgroundColor: "#FFFFFF", // white background
   },
   header: {
     padding: 20,
-    backgroundColor: "white",
-    borderBottomWidth: 1,
-    borderBottomColor: "#F0F0F0",
+    backgroundColor: "#fff", // cyan accent
+    borderBottomWidth: 3,
+    borderBottomColor: "#000",
+    // removed boxShadow for simplicity
   },
   watchlistSection: {
-    backgroundColor: "white",
-    borderRadius: 12,
-    marginBottom: 12,
-    overflow: "hidden",
-    elevation: 1,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 2,
+    borderColor: "#000",
+    borderRadius: 0,
+    marginBottom: 16,
   },
   watchlistHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     padding: 16,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: "#00BBF9", // cyan accent
+    borderBottomWidth: 3,
+    borderBottomColor: "#000",
   },
   watchlistName: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#111827",
+    fontSize: 18,
+    fontWeight: "800",
+    color: "#000",
   },
   watchlistHeaderRight: {
     flexDirection: "row",
     alignItems: "center",
   },
   stockCount: {
-    color: "#6B7280",
+    color: "#000",
     marginRight: 8,
     fontSize: 14,
+    fontWeight: "600",
   },
   chevron: {
     transform: [{ rotate: "0deg" }],
@@ -228,18 +230,19 @@ const styles = StyleSheet.create({
     transform: [{ rotate: "90deg" }],
   },
   stockList: {
-    paddingHorizontal: 8,
-    paddingBottom: 8,
+    padding: 8,
+    backgroundColor: "#FFFFFF",
   },
   title: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: "#111827",
+    fontSize: 28,
+    fontWeight: "900",
+    color: "#000",
   },
   subtitle: {
     fontSize: 14,
-    color: "#6B7280",
+    color: "#000",
     marginTop: 4,
+    fontWeight: "600",
   },
   listContainer: {
     padding: 16,
@@ -249,29 +252,27 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "white",
-    borderRadius: 12,
+    backgroundColor: "#FFFFFF", // white background
+    borderWidth: 2,
+    borderColor: "#000",
+    borderRadius: 0,
     padding: 16,
     marginBottom: 12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
   },
   stockInfo: {
     flex: 1,
     marginRight: 16,
   },
   stockSymbol: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#111827",
+    fontSize: 18,
+    fontWeight: "900",
+    color: "#000",
   },
   stockName: {
     fontSize: 14,
-    color: "#6B7280",
+    color: "#000",
     marginTop: 2,
+    fontWeight: "600",
   },
   actionButtons: {
     flexDirection: "row",
@@ -280,41 +281,49 @@ const styles = StyleSheet.create({
   viewButton: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#EBF5FF",
+    backgroundColor: "#00BBF9", // cyan accent
+    borderWidth: 2,
+    borderColor: "#000",
     paddingHorizontal: 12,
     paddingVertical: 8,
-    borderRadius: 8,
+    borderRadius: 0,
     marginRight: 8,
   },
   viewButtonText: {
-    color: "#3B82F6",
-    fontWeight: "600",
+    color: "#000",
+    fontWeight: "800",
     fontSize: 14,
     marginLeft: 4,
   },
   removeButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "#FEF2F2",
+    width: 40,
+    height: 40,
+    borderRadius: 0,
+    backgroundColor: "#000", // black for remove button for strong contrast
     justifyContent: "center",
     alignItems: "center",
+    borderWidth: 2,
+    borderColor: "#000",
   },
   emptyContainer: {
     alignItems: "center",
     justifyContent: "center",
     padding: 40,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 2,
+    borderColor: "#000",
   },
   emptyTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#111827",
+    fontSize: 20,
+    fontWeight: "900",
+    color: "#000",
     marginBottom: 8,
   },
   emptySubtitle: {
     fontSize: 14,
-    color: "#6B7280",
+    color: "#000",
     textAlign: "center",
     lineHeight: 20,
+    fontWeight: "600",
   },
 });
