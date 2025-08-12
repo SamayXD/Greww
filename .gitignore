@@ -26,6 +26,11 @@ npm-debug.*
 yarn-debug.*
 yarn-error.*
 
+ios
+android
+.env
+.env.local
+
 # macOS
 .DS_Store
 *.pem

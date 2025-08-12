@@ -1,0 +1,18 @@
+● Explore Screen: A page with Top Gainers and Losers section.
+Each section contains a grid of cards that shows information about stocks/etfs.
+● Watchlist: A page where we show all watchlist lists. An empty state
+should be there if no watchlist is present.
+● Product Screen: A page showing basic information of stocks/etfs and a line
+graph of prices. Users can add / remove stocks to the watchlist from this
+screen. The icon on this screen should be changed to show if stock has been
+added to the watchlist.
+● Popup to add to watchlist: User can add a new watchlist name or
+select existing watchlist to add the stock to watchlist. Use techniques to
+save and show watchlist items from what the user has added to
+watchlist from Stocks Details screen
+● View All Screen: A page with pagination where users can see all the list of
+stocks under specific sections on explore. Should contain pagination if
+needed.
+
+
+● make a sophesticated and POLISHED but minimalistic UI like a modern app.
