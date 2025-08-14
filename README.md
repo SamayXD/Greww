@@ -1,6 +1,29 @@
-# Greww - Stock Market Tracker
+# Greww - Basic stocks / etfs platform concept 
 
 A modern, neobrutalist stock market tracking application built with React Native and Expo. Track your favorite stocks, view market movers, and get detailed stock information.
+
+## 📱 ScreenShots
+<table>
+  <tr>
+    <td><img src="https://github.com/user-attachments/assets/ba80efaf-1ca3-4392-b3d5-b56c305f274e" width="300"/></td>
+     <td><img src="https://github.com/user-attachments/assets/61afd9f1-df5d-44ef-b6a1-c8a149207548" width="300"/></td>
+     <td><img src="https://github.com/user-attachments/assets/7c1c287c-5a03-425b-be34-a7a673527290" width="300"/></td>
+     <td><img src="https://github.com/user-attachments/assets/5ba7ec04-a0f5-4df0-bc2a-3d50d149b2b0" width="300"/></td>
+  </tr>
+ <tr>
+    <td><img src="https://github.com/user-attachments/assets/2f9c069f-e015-48e4-8137-2fcd7ef833e0" width="300"/></td>
+     <td><img src="https://github.com/user-attachments/assets/24153622-3235-4f6b-8264-d2dc8a292275" width="300"/></td>
+     <td><img src="https://github.com/user-attachments/assets/3e5137f0-127f-4745-8910-913ef0743dc2" width="300"/></td>
+     <td><img src="https://github.com/user-attachments/assets/031e56c4-071a-4545-b54d-0b8a3146c17f" width="300"/></td>
+  </tr>
+</table>
+
+## Video
+
+https://github.com/user-attachments/assets/b0b119be-ce04-495c-b341-a102b96fefd0
+
+
+
 
 ## 🚀 Features
 
@@ -43,7 +66,6 @@ A modern, neobrutalist stock market tracking application built with React Native
    ```
    - Press `i` for iOS simulator
    - Press `a` for Android emulator
-   - Press `w` for web browser
 
 ## 🔑 API Key Setup
 
@@ -141,25 +163,13 @@ greww/
 ### iOS
 
 ```bash
-npm run ios
-# or
-yarn ios
+npx expo run:ios
 ```
 
 ### Android
 
 ```bash
-npm run android
-# or
-yarn android
-```
-
-### Web
-
-```bash
-npm run web
-# or
-yarn web
+npx expo run:android
 ```
 
 ## 📝 License
