@@ -15,7 +15,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.elixir-engineering.Greww"
+      "bundleIdentifier": "com.samayxd.greww"
     },
     "android": {
       "adaptiveIcon": {
@@ -23,7 +23,7 @@
         "backgroundColor": "#000000"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.elixirengineering.Greww"
+      "package": "com.samayxd.greww"
     },
     "web": {
       "favicon": "./assets/greww_icon.png"
