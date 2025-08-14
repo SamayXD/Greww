@@ -60,9 +60,7 @@ https://github.com/user-attachments/assets/b0b119be-ce04-495c-b341-a102b96fefd0
 
 3. **Start the development server**
    ```bash
-   npm start
-   # or
-   yarn start
+   npx expo start
    ```
    - Press `i` for iOS simulator
    - Press `a` for Android emulator
