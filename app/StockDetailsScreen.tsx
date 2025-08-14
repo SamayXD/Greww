@@ -24,7 +24,12 @@ import {
   StockItem,
   Watchlist,
 } from "../src/store/slices/watchlistSlice";
-import { Heart, Plus } from "lucide-react-native";
+import {
+  Heart,
+  ArrowLeft,
+  TrendingUp,
+  TrendingDown,
+} from "lucide-react-native";
 import WatchlistManager from "../src/components/WatchlistManager";
 import { LinearGradient } from "expo-linear-gradient";
 import { wp } from "../src/utils/responsive";
@@ -67,12 +72,20 @@ const StockDetailsScreen = () => {
     const dates = Object.keys(priceData).slice(0, parseInt(timeRange));
     const prices = dates.map((date) => parseFloat(priceData[date]["4. close"]));
 
+    // Format dates based on time range
+    const formatDate = (dateStr) => {
+      const date = new Date(dateStr);
+      const month = (date.getMonth() + 1).toString().padStart(2, "0");
+      const day = date.getDate().toString().padStart(2, "0");
+      return `${month}/${day}`;
+    };
+
     return {
-      labels: dates.map((date) => date.slice(5)),
+      labels: dates.map(formatDate),
       datasets: [
         {
           data: prices.reverse(),
-          strokeWidth: 2,
+          strokeWidth: 3,
         },
       ],
     };
@@ -93,12 +106,14 @@ const StockDetailsScreen = () => {
     return (
       <SafeAreaView style={styles.container}>
         <LinearGradient
-          colors={["#FAFAFA", "#F5F5F5"]}
+          colors={["#FFFFFF", "#F8F9FF"]}
           style={styles.loadingContainer}
         >
           <View style={styles.loadingContent}>
-            <ActivityIndicator size="large" color="#000" />
-            <Text style={styles.loadingText}>Loading</Text>
+            <View style={styles.loadingSpinner}>
+              <ActivityIndicator size="large" color="#000" />
+            </View>
+            <Text style={styles.loadingText}>LOADING STOCK DATA</Text>
           </View>
         </LinearGradient>
       </SafeAreaView>
@@ -109,13 +124,16 @@ const StockDetailsScreen = () => {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>Unable to load data</Text>
-          <TouchableOpacity
-            style={styles.retryButton}
-            onPress={() => router.back()}
-          >
-            <Text style={styles.retryText}>Back</Text>
-          </TouchableOpacity>
+          <View style={styles.errorBox}>
+            <Text style={styles.errorTitle}>⚠ ERROR</Text>
+            <Text style={styles.errorText}>Unable to load stock data</Text>
+            <TouchableOpacity
+              style={styles.retryButton}
+              onPress={() => router.back()}
+            >
+              <Text style={styles.retryText}>GO BACK</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </SafeAreaView>
     );
@@ -129,15 +147,40 @@ const StockDetailsScreen = () => {
   const handleWatchlistManagerClose = () => {
     setShowWatchlistManager(false);
   };
-  const processedLabels = chartData?.labels.map((label, i) =>
-    i % 12 === 0 ? label : ""
-  );
+
+  // Generate labels with proper intervals based on time range
+  const getFormattedLabels = (chartData) => {
+    if (!chartData) return [];
+
+    const totalLabels = chartData.labels.length;
+    let interval;
+
+    // Set interval based on time range
+    switch (timeRange) {
+      case "7":
+        interval = 1; // Show every day for 7 days
+        break;
+      case "30":
+        interval = Math.ceil(totalLabels / 6); // Show ~6 labels for 30 days
+        break;
+      case "90":
+        interval = Math.ceil(totalLabels / 7); // Show ~7 labels for 90 days
+        break;
+      default:
+        interval = Math.ceil(totalLabels / 6);
+    }
+
+    return chartData.labels.map((label, index) => {
+      return index % interval === 0 ? label : "";
+    });
+  };
 
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView
         showsVerticalScrollIndicator={false}
         style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
       >
         {/* Header */}
         <View style={styles.header}>
@@ -145,16 +188,25 @@ const StockDetailsScreen = () => {
             style={styles.backButton}
             onPress={() => router.back()}
           >
-            <Text style={styles.backText}>×</Text>
+            <ArrowLeft size={20} color="#FFFFFF" strokeWidth={3} />
           </TouchableOpacity>
+
+          <View style={styles.headerTitle}>
+            <Text style={styles.headerText}>STOCK DETAILS</Text>
+          </View>
+
           <TouchableOpacity
-            style={styles.watchlistButton}
+            style={[
+              styles.watchlistButton,
+              isInWatchlist && styles.watchlistButtonActive,
+            ]}
             onPress={toggleWatchlist}
           >
             <Heart
-              size={24}
-              color={isInWatchlist ? "#EF4444" : "#9CA3AF"}
-              fill={isInWatchlist ? "#EF4444" : "transparent"}
+              size={20}
+              color={isInWatchlist ? "#FFFFFF" : "#000000"}
+              fill={isInWatchlist ? "#FFFFFF" : "transparent"}
+              strokeWidth={3}
             />
           </TouchableOpacity>
         </View>
@@ -167,92 +219,132 @@ const StockDetailsScreen = () => {
           companyName={companyData?.Name || (symbol as string)}
         />
 
-        {/* Stock Info */}
-        <View style={styles.stockInfo}>
-          <Text style={styles.symbol}>{symbol}</Text>
+        {/* Stock Info Card */}
+        <View style={styles.stockInfoCard}>
+          <View style={styles.stockHeader}>
+            <Text style={styles.symbol}>{symbol}</Text>
+            <View
+              style={[
+                styles.trendBadge,
+                { backgroundColor: isPositive ? "#34C759" : "#FF3B30" },
+              ]}
+            >
+              {isPositive ? (
+                <TrendingUp size={16} color="#FFFFFF" strokeWidth={3} />
+              ) : (
+                <TrendingDown size={16} color="#FFFFFF" strokeWidth={3} />
+              )}
+            </View>
+          </View>
           <Text style={styles.companyName}>{companyData?.Name}</Text>
 
           <View style={styles.priceSection}>
             <Text style={styles.currentPrice}>${currentPrice?.toFixed(2)}</Text>
-            <View style={styles.changeContainer}>
-              <Text
-                style={[
-                  styles.change,
-                  { color: isPositive ? "#34C759" : "#FF3B30" },
-                ]}
-              >
-                {isPositive ? "+" : ""}${Math.abs(priceChange).toFixed(2)} (
+            <View
+              style={[
+                styles.changeContainer,
+                {
+                  backgroundColor: isPositive ? "#34C759" : "#FF3B30",
+                },
+              ]}
+            >
+              <Text style={styles.change}>
+                {isPositive ? "+" : ""}${Math.abs(priceChange).toFixed(2)}
+              </Text>
+              <Text style={styles.changePercent}>
                 {isPositive ? "+" : ""}
-                {priceChangePercent}%)
+                {priceChangePercent}%
               </Text>
             </View>
           </View>
         </View>
 
-        {/* Time Range */}
-        <View style={styles.timeRangeContainer}>
-          {["7", "30", "90"].map((range) => (
-            <TouchableOpacity
-              key={range}
-              style={[
-                styles.timeButton,
-                timeRange === range && styles.activeTimeButton,
-              ]}
-              onPress={() => setTimeRange(range)}
-            >
-              <Text
+        {/* Time Range Selector */}
+        <View style={styles.timeRangeCard}>
+          <Text style={styles.cardTitle}>TIME PERIOD</Text>
+          <View style={styles.timeRangeContainer}>
+            {["7", "30", "90"].map((range) => (
+              <TouchableOpacity
+                key={range}
                 style={[
-                  styles.timeButtonText,
-                  timeRange === range && styles.activeTimeButtonText,
+                  styles.timeButton,
+                  timeRange === range && styles.activeTimeButton,
                 ]}
+                onPress={() => setTimeRange(range)}
               >
-                {range}D
-              </Text>
-            </TouchableOpacity>
-          ))}
+                <Text
+                  style={[
+                    styles.timeButtonText,
+                    timeRange === range && styles.activeTimeButtonText,
+                  ]}
+                >
+                  {range}D
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
         </View>
 
-        {/* Chart */}
+        {/* Chart Card */}
         {chartData && (
-          <View style={styles.chartContainer}>
-            <LineChart
-              data={{
-                labels: processedLabels,
-                datasets: [{ data: chartData.datasets[0].data }],
-              }}
-              width={width - 60}
-              height={220}
-              chartConfig={{
-                backgroundColor: "transparent",
-                backgroundGradientFrom: "#fff",
-                backgroundGradientTo: "#fff",
-                decimalPlaces: 2,
-                color: () =>
-                  isPositive ? "rgba(52, 199, 89, 1)" : "rgba(255, 59, 48, 1)",
-                labelColor: () => "#000",
-                propsForDots: { r: "0" },
-                propsForBackgroundLines: { stroke: "transparent" },
-                propsForLabels: { fontSize: 12, fontWeight: "700" },
-                formatYLabel: (value) => `$${parseFloat(value).toFixed(2)}`,
-              }}
-              style={{ marginHorizontal: 20 }}
-              withDots={false}
-              withShadow={false}
-              withInnerLines={false}
-              withOuterLines={false}
-              withHorizontalLabels={true}
-              withVerticalLabels={true}
-              segments={8} // fewer Y-axis segments
-              // formatXLabel={(value) => value}
-              xLabelsOffset={1}
-              fromZero
-            />
+          <View style={styles.chartCard}>
+            <Text style={styles.cardTitle}>PRICE CHART</Text>
+            <View style={styles.chartContainer}>
+              <LineChart
+                data={{
+                  labels: getFormattedLabels(chartData),
+                  datasets: [{ data: chartData.datasets[0].data }],
+                }}
+                width={width - 80}
+                height={220}
+                chartConfig={{
+                  backgroundColor: "#FFFFFF",
+                  backgroundGradientFrom: "#FFFFFF",
+                  backgroundGradientTo: "#FFFFFF",
+                  decimalPlaces: 2,
+                  color: () => (isPositive ? "#34C759" : "#FF3B30"),
+                  labelColor: () => "#000000",
+                  style: {
+                    borderRadius: 0,
+                  },
+                  propsForDots: { r: "0" },
+                  propsForBackgroundLines: {
+                    stroke: "#E0E0E0",
+                    strokeWidth: 1,
+                    strokeDasharray: "0",
+                  },
+                  propsForVerticalLabels: {
+                    fontSize: 12,
+                    fontWeight: "800",
+                    fill: "#000000",
+                  },
+                  propsForHorizontalLabels: {
+                    fontSize: 12,
+                    fontWeight: "800",
+                    fill: "#000000",
+                  },
+                  formatYLabel: (value) => `${parseFloat(value).toFixed(0)}`,
+                }}
+                style={styles.chart}
+                withDots={false}
+                withShadow={false}
+                withInnerLines={true}
+                withOuterLines={false}
+                withHorizontalLabels={true}
+                withVerticalLabels={true}
+                segments={4}
+                xLabelsOffset={5}
+                yLabelsOffset={15}
+                withVerticalLines={true}
+                withHorizontalLines={true}
+              />
+            </View>
           </View>
         )}
 
-        {/* Key Metrics */}
-        <View style={styles.metricsContainer}>
-          <Text style={styles.sectionTitle}>Overview</Text>
+        {/* Key Metrics Card */}
+        <View style={styles.metricsCard}>
+          <Text style={styles.cardTitle}>KEY METRICS</Text>
           <View style={styles.metricsList}>
             <MetricRow
               label="Market Cap"
@@ -281,9 +373,9 @@ const StockDetailsScreen = () => {
           </View>
         </View>
 
-        {/* Company Details */}
-        <View style={styles.detailsContainer}>
-          <Text style={styles.sectionTitle}>Details</Text>
+        {/* Company Details Card */}
+        <View style={styles.detailsCard}>
+          <Text style={styles.cardTitle}>COMPANY INFO</Text>
           <View style={styles.detailsList}>
             <DetailRow label="Industry" value={companyData?.Industry || "—"} />
             <DetailRow label="Sector" value={companyData?.Sector || "—"} />
@@ -292,13 +384,13 @@ const StockDetailsScreen = () => {
           </View>
         </View>
 
-        {/* Description */}
+        {/* Description Card */}
         {companyData?.Description && (
-          <View style={styles.descriptionContainer}>
-            <Text style={styles.sectionTitle}>About</Text>
+          <View style={styles.descriptionCard}>
+            <Text style={styles.cardTitle}>ABOUT COMPANY</Text>
             <Text style={styles.description}>
-              {companyData.Description.length > 280
-                ? `${companyData.Description.substring(0, 280)}...`
+              {companyData.Description.length > 300
+                ? `${companyData.Description.substring(0, 300)}...`
                 : companyData.Description}
             </Text>
           </View>
@@ -334,10 +426,13 @@ const formatMarketCap = (marketCap) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF", // pure white bg
+    backgroundColor: "#F8F9FF",
   },
   scrollView: {
     flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 40,
   },
   loadingContainer: {
     flex: 1,
@@ -346,264 +441,335 @@ const styles = StyleSheet.create({
   },
   loadingContent: {
     alignItems: "center",
+    padding: 40,
+  },
+  loadingSpinner: {
+    backgroundColor: "#FFFFFF",
+    padding: 20,
+    borderWidth: 3,
+    borderColor: "#000000",
+    boxShadow: "6px 6px 0px #000000",
+    marginBottom: 20,
   },
   loadingText: {
-    marginTop: 12,
-    fontSize: 16,
+    fontSize: 18,
     color: "#000000",
-    fontWeight: "700",
+    fontWeight: "900",
+    letterSpacing: 2,
   },
   errorContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    padding: 20,
+  },
+  errorBox: {
+    backgroundColor: "#FFFFFF",
     padding: 40,
+    borderWidth: 3,
+    borderColor: "#000000",
+    boxShadow: "8px 8px 0px #000000",
+    alignItems: "center",
+  },
+  errorTitle: {
+    fontSize: 24,
+    color: "#FF3B30",
+    fontWeight: "900",
+    letterSpacing: 2,
+    marginBottom: 16,
   },
   errorText: {
     fontSize: 16,
-    color: "#000",
+    color: "#000000",
     textAlign: "center",
-    marginBottom: 20,
+    marginBottom: 24,
     fontWeight: "700",
   },
   retryButton: {
-    backgroundColor: "#00BBF9", // cyan accent
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 0,
+    backgroundColor: "#007AFF",
+    paddingHorizontal: 32,
+    paddingVertical: 16,
     borderWidth: 3,
-    borderColor: "#000",
-    shadowColor: "#000",
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
+    borderColor: "#000000",
+    boxShadow: "4px 4px 0px #000000",
   },
   retryText: {
-    color: "#000000",
+    color: "#FFFFFF",
     fontSize: 16,
     fontWeight: "900",
-    letterSpacing: 1,
+    letterSpacing: 1.5,
   },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 10,
+    paddingVertical: 20,
+    backgroundColor: "#FFFFFF",
     borderBottomWidth: 4,
-    borderBottomColor: "#000",
+    borderBottomColor: "#000000",
+    marginBottom: 20,
   },
   backButton: {
-    width: 44,
-    height: 44,
-    backgroundColor: "#000",
+    width: 48,
+    height: 48,
+    backgroundColor: "#000000",
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 3,
-    borderColor: "#00BBF9", // cyan border
-    borderRadius: 0,
+    borderColor: "#000000",
+    boxShadow: "3px 3px 0px #00BBF9",
+    borderRadius: 5,
   },
-  backText: {
-    fontSize: 26,
-    color: "#00BBF9", // cyan text
+  headerTitle: {
+    flex: 1,
+    alignItems: "center",
+  },
+  headerText: {
+    fontSize: 18,
     fontWeight: "900",
-    lineHeight: 26,
+    color: "#000000",
+    letterSpacing: 2,
   },
   watchlistButton: {
-    width: 44,
-    height: 44,
+    width: 48,
+    height: 48,
     backgroundColor: "#FFFFFF",
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 3,
-    borderColor: "#000",
-    borderRadius: 0,
-    shadowColor: "#000",
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
+    borderColor: "#000000",
+    boxShadow: "3px 3px 0px #000000",
+    borderRadius: 5,
   },
-  stockInfo: {
-    paddingHorizontal: 20,
-    paddingVertical: 20,
-    borderBottomWidth: 4,
-    borderBottomColor: "#000",
+  watchlistButtonActive: {
+    backgroundColor: "#FF3B30",
+    boxShadow: "3px 3px 0px #000000",
+  },
+  stockInfoCard: {
+    backgroundColor: "#FFFFFF",
+    marginHorizontal: 20,
+    marginBottom: 20,
+    padding: 24,
+    borderWidth: 3,
+    borderColor: "#000000",
+    boxShadow: "6px 6px 0px #000000",
+    borderRadius: 10,
+  },
+  stockHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  trendBadge: {
+    padding: 8,
+    borderWidth: 3,
+    borderColor: "#000000",
+    boxShadow: "2px 2px 0px #000000",
+    borderRadius: 5,
   },
   symbol: {
-    fontSize: 32,
+    fontSize: 36,
     fontWeight: "900",
-    color: "#000",
+    color: "#000000",
     letterSpacing: -1,
   },
   companyName: {
-    fontSize: 18,
-    color: "#000",
-    marginTop: 6,
+    fontSize: 16,
+    color: "#666666",
+    marginBottom: 24,
     fontWeight: "700",
   },
   priceSection: {
-    marginTop: 28,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "flex-start",
-    gap: 20,
+    justifyContent: "space-between",
   },
   currentPrice: {
-    fontSize: 44,
+    fontSize: 48,
     fontWeight: "900",
-    color: "#000",
-    letterSpacing: -1,
+    color: "#000000",
+    letterSpacing: -2,
   },
   changeContainer: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     borderWidth: 3,
-    borderColor: "#000",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 0,
+    borderColor: "#000000",
+    boxShadow: "3px 3px 0px #000000",
+    borderRadius: 5,
+    alignItems: "center",
   },
   change: {
     fontSize: 18,
     fontWeight: "900",
+    color: "#FFFFFF",
     letterSpacing: 0.5,
+  },
+  changePercent: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#FFFFFF",
+    marginTop: 2,
+  },
+  timeRangeCard: {
+    backgroundColor: "#FFFFFF",
+    marginHorizontal: 20,
+    marginBottom: 20,
+    padding: 20,
+    borderWidth: 3,
+    borderColor: "#000000",
+    boxShadow: "4px 4px 0px #000000",
+    borderRadius: 5,
+  },
+  cardTitle: {
+    fontSize: 16,
+    fontWeight: "900",
+    color: "#000000",
+    letterSpacing: 1.5,
+    marginBottom: 16,
   },
   timeRangeContainer: {
     flexDirection: "row",
-    paddingHorizontal: 20,
-    marginVertical: 20,
+    gap: 12,
   },
   timeButton: {
-    paddingHorizontal: 18,
-    paddingVertical: 10,
-    marginRight: 10,
-    borderRadius: 0,
-    backgroundColor: "#fff",
+    flex: 1,
+    paddingVertical: 12,
+    backgroundColor: "#F8F9FF",
     borderWidth: 3,
-    borderColor: "#000",
-    shadowColor: "#000",
-    shadowOffset: { width: 3, height: 3 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
+    borderColor: "#000000",
+    boxShadow: "2px 2px 0px #000000",
+    alignItems: "center",
+    borderRadius: 5,
   },
   activeTimeButton: {
     backgroundColor: "#00BBF9",
-    borderColor: "#000",
+    boxShadow: "2px 2px 0px #000000",
+    borderRadius: 5,
   },
   timeButtonText: {
     fontSize: 16,
-    color: "#000",
-    fontWeight: "700",
+    color: "#000000",
+    fontWeight: "800",
     letterSpacing: 1,
   },
   activeTimeButtonText: {
-    color: "#000",
+    color: "#FFFFFF",
+  },
+  chartCard: {
+    backgroundColor: "#FFFFFF",
+    marginHorizontal: 20,
+    marginBottom: 20,
+    padding: 20,
+    borderWidth: 3,
+    borderColor: "#000000",
+    boxShadow: "6px 6px 0px #000000",
+    borderRadius: 5,
   },
   chartContainer: {
     alignItems: "center",
-    marginBottom: 40,
-    borderWidth: 4,
-    borderColor: "#000",
-    padding: 12,
-    borderRadius: 0,
-    shadowColor: "#000",
-    shadowOffset: { width: 6, height: 6 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    backgroundColor: "#fff",
-    paddingHorizontal: 20,
-    width: wp(90),
-    alignSelf: "center",
+    backgroundColor: "#FFFFFF",
+    padding: 16,
+    borderWidth: 3,
+    borderColor: "#000000",
+    boxShadow: "3px 3px 0px #F8F9FF",
+    borderRadius: 5,
   },
   chart: {
     borderRadius: 0,
   },
-  metricsContainer: {
-    paddingHorizontal: 20,
-    marginBottom: 40,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: "900",
-    color: "#000",
+  metricsCard: {
+    backgroundColor: "#FFFFFF",
+    marginHorizontal: 20,
     marginBottom: 20,
-    letterSpacing: 1,
+    padding: 20,
+    borderWidth: 3,
+    borderColor: "#000000",
+    boxShadow: "5px 5px 0px #000000",
+    borderRadius: 5,
   },
   metricsList: {
-    backgroundColor: "#fff",
-    borderRadius: 0,
     borderWidth: 3,
-    borderColor: "#000",
-    shadowColor: "#000",
-    shadowOffset: { width: 5, height: 5 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
+    borderColor: "#000000",
+    boxShadow: "3px 3px 0px #F8F9FF",
+    borderRadius: 5,
   },
   metricRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 18,
-    paddingVertical: 14,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    backgroundColor: "#FFFFFF",
     borderBottomWidth: 3,
-    borderBottomColor: "#000",
+    borderBottomColor: "#000000",
   },
   metricLabel: {
     fontSize: 16,
-    color: "#000",
+    color: "#000000",
     fontWeight: "700",
-    letterSpacing: 0.5,
   },
   metricValue: {
     fontSize: 16,
-    color: "#000",
+    color: "#000000",
     fontWeight: "900",
   },
-  detailsContainer: {
-    paddingHorizontal: 20,
-    marginBottom: 40,
+  detailsCard: {
+    backgroundColor: "#FFFFFF",
+    marginHorizontal: 20,
+    marginBottom: 20,
+    padding: 20,
+    borderWidth: 3,
+    borderColor: "#000000",
+    boxShadow: "5px 5px 0px #000000",
+    borderRadius: 5,
   },
   detailsList: {
-    backgroundColor: "#fff",
-    borderRadius: 0,
     borderWidth: 3,
-    borderColor: "#000",
-    shadowColor: "#000",
-    shadowOffset: { width: 5, height: 5 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
+    borderColor: "#000000",
+    boxShadow: "3px 3px 0px #F8F9FF",
+    borderRadius: 5,
   },
   detailRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 18,
-    paddingVertical: 14,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    backgroundColor: "#FFFFFF",
     borderBottomWidth: 3,
-    borderBottomColor: "#000",
+    borderBottomColor: "#000000",
   },
   detailLabel: {
     fontSize: 16,
-    color: "#000",
+    color: "#000000",
     fontWeight: "700",
-    letterSpacing: 0.5,
   },
   detailValue: {
     fontSize: 16,
-    color: "#000",
+    color: "#000000",
     fontWeight: "900",
     textAlign: "right",
     flex: 1,
     marginLeft: 16,
   },
-  descriptionContainer: {
-    paddingHorizontal: 20,
-    paddingBottom: 40,
+  descriptionCard: {
+    backgroundColor: "#FFFFFF",
+    marginHorizontal: 20,
+    marginBottom: 20,
+    padding: 24,
+    borderWidth: 3,
+    borderColor: "#000000",
+    boxShadow: "6px 6px 0px #000000",
+    borderRadius: 5,
   },
   description: {
     fontSize: 16,
-    color: "#000",
+    color: "#000000",
     lineHeight: 24,
-    fontWeight: "700",
+    fontWeight: "600",
   },
 });
 

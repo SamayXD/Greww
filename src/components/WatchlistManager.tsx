@@ -18,9 +18,10 @@ import {
   selectAllWatchlists,
   initializeDefaultWatchlist,
 } from "../store/slices/watchlistSlice";
-import { Plus, X, Check, Folder, Bookmark } from "lucide-react-native";
+import { Plus, X, Check, Folder, Bookmark, Star } from "lucide-react-native";
 import Modal from "react-native-modal";
 import { wp } from "../utils/responsive";
+
 interface WatchlistManagerProps {
   visible: boolean;
   onClose: () => void;
@@ -150,7 +151,7 @@ const WatchlistManager: React.FC<WatchlistManagerProps> = ({
       if (!item || !item.id) {
         return (
           <View style={styles.watchlistItem}>
-            <Text>Invalid watchlist data</Text>
+            <Text style={styles.errorText}>Invalid watchlist data</Text>
           </View>
         );
       }
@@ -166,39 +167,53 @@ const WatchlistManager: React.FC<WatchlistManagerProps> = ({
             showSuccess && styles.watchlistItemSuccess,
           ]}
           onPress={() => handleToggleWatchlist(item.id, isInThisWatchlist)}
-          activeOpacity={0.7}
+          activeOpacity={0.8}
         >
           <View style={styles.watchlistItemContent}>
             <View style={styles.watchlistInfo}>
-              <View style={styles.watchlistIcon}>
-                <Bookmark
-                  size={16}
-                  color={showSuccess ? "#34C759" : "#3C3C43"}
+              <View
+                style={[
+                  styles.watchlistIcon,
+                  showSuccess && styles.watchlistIconSuccess,
+                ]}
+              >
+                <Star
+                  size={18}
+                  color={showSuccess ? "#FFFFFF" : "#000000"}
+                  fill={showSuccess ? "#FFFFFF" : "transparent"}
+                  strokeWidth={3}
                 />
               </View>
-              <View>
+              <View style={styles.watchlistDetails}>
                 <Text
                   style={[
                     styles.watchlistName,
                     showSuccess && styles.watchlistNameSuccess,
                   ]}
                 >
-                  {item.name || "Unnamed Watchlist"}
+                  {item.name || "UNNAMED WATCHLIST"}
                 </Text>
                 <Text style={styles.stockCount}>
                   {item.stocks && Array.isArray(item.stocks)
                     ? item.stocks.length
                     : 0}{" "}
-                  stocks
+                  STOCKS
                 </Text>
               </View>
             </View>
 
-            {showSuccess && (
-              <View style={styles.successIndicator}>
-                <Check size={16} color="#34C759" />
-              </View>
-            )}
+            <View
+              style={[
+                styles.statusIndicator,
+                showSuccess && styles.statusIndicatorSuccess,
+              ]}
+            >
+              {showSuccess ? (
+                <Check size={16} color="#FFFFFF" strokeWidth={3} />
+              ) : (
+                <Plus size={16} color="#000000" strokeWidth={3} />
+              )}
+            </View>
           </View>
         </TouchableOpacity>
       );
@@ -222,32 +237,30 @@ const WatchlistManager: React.FC<WatchlistManagerProps> = ({
       propagateSwipe={true}
       onShow={handleModalShow}
       onBackdropPress={onClose}
-      style={{
-        justifyContent: "center",
-        alignItems: "center",
-      }}
+      style={styles.modal}
     >
       <View style={styles.modalContent}>
         {/* Header */}
         <View style={styles.header}>
-          <View>
-            <Text style={styles.title}>Add to Watchlist</Text>
+          <View style={styles.headerInfo}>
+            <Text style={styles.title}>ADD TO WATCHLIST</Text>
             <Text style={styles.subtitle}>
-              {symbol} • {companyName}
+              {symbol} • {companyName?.toUpperCase()}
             </Text>
           </View>
           <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-            <X size={20} color="#3C3C43" />
+            <X size={20} color="#FFFFFF" strokeWidth={3} />
           </TouchableOpacity>
         </View>
 
         {/* Create New Watchlist */}
         <View style={styles.createSection}>
-          <Text style={styles.sectionTitle}>Create New Watchlist</Text>
+          <Text style={styles.sectionTitle}>CREATE NEW WATCHLIST</Text>
           <View style={styles.inputContainer}>
             <TextInput
               style={styles.input}
-              placeholder="Enter watchlist name"
+              placeholder="ENTER WATCHLIST NAME"
+              placeholderTextColor="#666666"
               value={newWatchlistName}
               onChangeText={setNewWatchlistName}
               onSubmitEditing={handleCreateWatchlist}
@@ -257,14 +270,15 @@ const WatchlistManager: React.FC<WatchlistManagerProps> = ({
               style={[
                 styles.createButton,
                 isCreating && styles.createButtonLoading,
+                !newWatchlistName.trim() && styles.createButtonDisabled,
               ]}
               onPress={handleCreateWatchlist}
               disabled={isCreating || !newWatchlistName.trim()}
             >
               {isCreating ? (
-                <Check size={18} color="#fff" />
+                <Check size={18} color="#FFFFFF" strokeWidth={3} />
               ) : (
-                <Plus size={18} color="#fff" />
+                <Plus size={18} color="#FFFFFF" strokeWidth={3} />
               )}
             </TouchableOpacity>
           </View>
@@ -273,29 +287,36 @@ const WatchlistManager: React.FC<WatchlistManagerProps> = ({
         {/* Watchlists Section */}
         <View style={styles.watchlistsSection}>
           <Text style={styles.sectionTitle}>
-            Your Watchlists ({watchlists?.length || 0})
+            YOUR WATCHLISTS ({watchlists?.length || 0})
           </Text>
 
           <View style={styles.watchlistsList}>
             {!watchlists ? (
               <View style={styles.emptyState}>
-                <Folder size={32} color="#8E8E93" />
-                <Text style={styles.emptyTitle}>Loading watchlists...</Text>
+                <View style={styles.emptyIcon}>
+                  <Folder size={32} color="#000000" strokeWidth={3} />
+                </View>
+                <Text style={styles.emptyTitle}>LOADING WATCHLISTS...</Text>
                 <Text style={styles.emptySubtext}>
                   Please wait while we load your watchlists
                 </Text>
               </View>
             ) : !Array.isArray(watchlists) ? (
               <View style={styles.emptyState}>
-                <Text style={styles.emptyTitle}>Data Error</Text>
+                <View style={styles.emptyIcon}>
+                  <X size={32} color="#FF3B30" strokeWidth={3} />
+                </View>
+                <Text style={styles.emptyTitle}>DATA ERROR</Text>
                 <Text style={styles.emptySubtext}>
                   Watchlists data is not in expected format
                 </Text>
               </View>
             ) : watchlists.length === 0 ? (
               <View style={styles.emptyState}>
-                <Folder size={32} color="#8E8E93" />
-                <Text style={styles.emptyTitle}>No Watchlists Yet</Text>
+                <View style={styles.emptyIcon}>
+                  <Folder size={32} color="#000000" strokeWidth={3} />
+                </View>
+                <Text style={styles.emptyTitle}>NO WATCHLISTS YET</Text>
                 <Text style={styles.emptySubtext}>
                   Create your first watchlist using the form above
                 </Text>
@@ -318,7 +339,7 @@ const WatchlistManager: React.FC<WatchlistManagerProps> = ({
                 maxToRenderPerBatch={10}
                 windowSize={10}
                 removeClippedSubviews={false}
-                contentContainerStyle={{ paddingBottom: 16 }}
+                contentContainerStyle={styles.flatListContent}
               />
             )}
           </View>
@@ -327,7 +348,7 @@ const WatchlistManager: React.FC<WatchlistManagerProps> = ({
         {/* Footer Actions */}
         <View style={styles.footer}>
           <TouchableOpacity style={styles.doneButton} onPress={onClose}>
-            <Text style={styles.doneButtonText}>Done</Text>
+            <Text style={styles.doneButtonText}>DONE</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -336,89 +357,117 @@ const WatchlistManager: React.FC<WatchlistManagerProps> = ({
 };
 
 const styles = StyleSheet.create({
+  modal: {
+    justifyContent: "flex-end",
+    alignItems: "center",
+    margin: 0,
+  },
   modalContent: {
-    backgroundColor: "#FFFFFF",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    backgroundColor: "#F8F9FF",
+    borderTopLeftRadius: 0,
+    borderTopRightRadius: 0,
     maxHeight: "85%",
     height: "80%",
-    paddingTop: 8,
+    paddingTop: 0,
     display: "flex",
     flexDirection: "column",
     width: wp(100),
-    justifyContent: "center",
-    position: "absolute",
-    bottom: 0,
+    borderWidth: 4,
+    borderColor: "#000000",
+    borderBottomWidth: 0,
+    boxShadow: "0px -6px 0px #000000",
   },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "flex-start",
+    alignItems: "center",
     paddingHorizontal: 20,
-    paddingVertical: 20,
-    borderBottomWidth: 0.5,
-    borderBottomColor: "#E5E5EA",
+    paddingVertical: 24,
+    backgroundColor: "#FFFFFF",
+    borderBottomWidth: 4,
+    borderBottomColor: "#000000",
+  },
+  headerInfo: {
+    flex: 1,
   },
   title: {
     fontSize: 20,
-    fontWeight: "700",
+    fontWeight: "900",
     color: "#000000",
+    letterSpacing: 1.5,
     marginBottom: 4,
   },
   subtitle: {
     fontSize: 14,
-    color: "#8E8E93",
-    fontWeight: "400",
+    color: "#666666",
+    fontWeight: "700",
+    letterSpacing: 0.5,
   },
   closeButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "#F2F2F7",
+    width: 40,
+    height: 40,
+    backgroundColor: "#000000",
     justifyContent: "center",
     alignItems: "center",
+    borderWidth: 3,
+    borderColor: "#000000",
+    boxShadow: "3px 3px 0px #FF3B30",
+    borderRadius: 5,
   },
   createSection: {
     paddingHorizontal: 20,
-    paddingVertical: 20,
-    borderBottomWidth: 0.5,
-    borderBottomColor: "#E5E5EA",
+    paddingVertical: 24,
+    backgroundColor: "#FFFFFF",
+    borderBottomWidth: 4,
+    borderBottomColor: "#000000",
   },
   sectionTitle: {
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: "900",
     color: "#000000",
-    marginBottom: 12,
+    letterSpacing: 1.2,
+    marginBottom: 16,
   },
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
+    gap: 12,
   },
   input: {
     flex: 1,
-    height: 44,
-    backgroundColor: "#F2F2F7",
-    borderRadius: 12,
+    height: 48,
+    backgroundColor: "#F8F9FF",
+    borderWidth: 3,
+    borderColor: "#000000",
     paddingHorizontal: 16,
     fontSize: 16,
     color: "#000000",
-    marginRight: 12,
+    fontWeight: "700",
+    borderRadius: 5,
+    boxShadow: "2px 2px 0px #000000",
   },
   createButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    backgroundColor: "#007AFF",
+    width: 48,
+    height: 48,
+    backgroundColor: "#00BBF9",
     justifyContent: "center",
     alignItems: "center",
+    borderWidth: 3,
+    borderColor: "#000000",
+    borderRadius: 5,
+    boxShadow: "3px 3px 0px #000000",
   },
   createButtonLoading: {
     backgroundColor: "#34C759",
   },
+  createButtonDisabled: {
+    backgroundColor: "#CCCCCC",
+    boxShadow: "2px 2px 0px #000000",
+  },
   watchlistsSection: {
     flex: 1,
     paddingHorizontal: 20,
-    paddingTop: 20,
+    paddingTop: 24,
     display: "flex",
     flexDirection: "column",
   },
@@ -426,42 +475,52 @@ const styles = StyleSheet.create({
     flex: 1,
     minHeight: 200,
   },
+  flatListContent: {
+    paddingBottom: 16,
+  },
   footer: {
     paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderTopWidth: 0.5,
-    borderTopColor: "#E5E5EA",
+    paddingVertical: 20,
     backgroundColor: "#FFFFFF",
+    borderTopWidth: 4,
+    borderTopColor: "#000000",
   },
   doneButton: {
-    height: 48,
-    borderRadius: 12,
+    height: 52,
     backgroundColor: "#000000",
     alignItems: "center",
     justifyContent: "center",
+    borderWidth: 3,
+    borderColor: "#000000",
+    boxShadow: "4px 4px 0px #00BBF9",
+    borderRadius: 5,
   },
   doneButtonText: {
     color: "#FFFFFF",
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: "900",
+    letterSpacing: 1.5,
   },
   watchlistItem: {
-    backgroundColor: "#F2F2F7",
-    borderRadius: 12,
-    marginBottom: 8,
+    backgroundColor: "#FFFFFF",
+    marginBottom: 12,
     overflow: "hidden",
+    borderWidth: 3,
+    borderColor: "#000000",
+    // boxShadow: "3px 3px 0px #000000",
+    borderRadius: 5,
   },
   watchlistItemSuccess: {
-    backgroundColor: "#E8F5E8",
-    borderWidth: 1,
-    borderColor: "#34C759",
+    backgroundColor: "#34C759",
+    boxShadow: "3px 3px 0px #000000",
+    borderRadius: 5,
   },
   watchlistItemContent: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 16,
+    paddingHorizontal: 20,
+    paddingVertical: 20,
   },
   watchlistInfo: {
     flexDirection: "row",
@@ -469,54 +528,89 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   watchlistIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 8,
-    backgroundColor: "#FFFFFF",
+    width: 40,
+    height: 40,
+    backgroundColor: "#F8F9FF",
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 12,
+    marginRight: 16,
+    borderWidth: 3,
+    borderColor: "#000000",
+    boxShadow: "2px 2px 0px #000000",
+    borderRadius: 5,
+  },
+  watchlistIconSuccess: {
+    backgroundColor: "#000000",
+  },
+  watchlistDetails: {
+    flex: 1,
   },
   watchlistName: {
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: "900",
     color: "#000000",
-    marginBottom: 2,
+    letterSpacing: 0.5,
+    marginBottom: 4,
   },
   watchlistNameSuccess: {
-    color: "#34C759",
+    color: "#FFFFFF",
   },
   stockCount: {
-    fontSize: 13,
-    color: "#8E8E93",
-    fontWeight: "400",
+    fontSize: 12,
+    color: "#666666",
+    fontWeight: "700",
+    letterSpacing: 1,
   },
-  successIndicator: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: "#FFFFFF",
+  statusIndicator: {
+    width: 32,
+    height: 32,
+    backgroundColor: "#00BBF9",
     justifyContent: "center",
     alignItems: "center",
+    borderWidth: 3,
+    borderColor: "#000000",
+    boxShadow: "2px 2px 0px #000000",
+    borderRadius: 5,
+  },
+  statusIndicatorSuccess: {
+    backgroundColor: "#000000",
   },
   emptyState: {
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 40,
+    paddingVertical: 60,
     flex: 1,
+  },
+  emptyIcon: {
+    backgroundColor: "#FFFFFF",
+    padding: 20,
+    borderWidth: 4,
+    borderColor: "#000000",
+    boxShadow: "4px 4px 0px #000000",
+    borderRadius: 5,
+    marginBottom: 20,
   },
   emptyTitle: {
     fontSize: 18,
-    fontWeight: "600",
+    fontWeight: "900",
     color: "#000000",
-    marginTop: 16,
-    marginBottom: 8,
+    letterSpacing: 1,
+    marginBottom: 12,
   },
   emptySubtext: {
     fontSize: 14,
-    color: "#8E8E93",
+    color: "#666666",
     textAlign: "center",
     lineHeight: 20,
+    fontWeight: "600",
+    maxWidth: 280,
+  },
+  errorText: {
+    fontSize: 14,
+    color: "#FF3B30",
+    fontWeight: "700",
+    textAlign: "center",
+    padding: 16,
   },
 });
 

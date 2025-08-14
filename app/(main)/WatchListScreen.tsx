@@ -9,7 +9,6 @@ import {
   SectionList,
 } from "react-native";
 import React, { useState, useEffect } from "react";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../../src/store";
 import {
@@ -22,6 +21,11 @@ import {
 } from "../../src/store/slices/watchlistSlice";
 import { router } from "expo-router";
 import { Trash2, TrendingUp, Plus, ChevronRight } from "lucide-react-native";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
+import { StatusBar } from "expo-status-bar";
 
 const { width } = Dimensions.get("window");
 
@@ -150,30 +154,39 @@ const WatchListScreen = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Watchlists</Text>
-        <Text style={styles.subtitle}>
-          {watchlists?.length || 0} watchlists
-        </Text>
-      </View>
+    <>
+      <View
+        style={[
+          styles.container,
+          {
+            paddingTop: useSafeAreaInsets().top,
+          },
+        ]}
+      >
+        <View style={styles.header}>
+          <Text style={styles.title}>Watchlists</Text>
+          <Text style={styles.subtitle}>
+            {watchlists?.length || 0} watchlists
+          </Text>
+        </View>
 
-      <FlatList
-        data={watchlists || []}
-        renderItem={renderWatchlist}
-        keyExtractor={(item) => item?.id || Math.random().toString()}
-        contentContainerStyle={styles.listContainer}
-        ListEmptyComponent={() => (
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyTitle}>No watchlists yet</Text>
-            <Text style={styles.emptySubtitle}>
-              Create your first watchlist by adding a stock
-            </Text>
-          </View>
-        )}
-        showsVerticalScrollIndicator={false}
-      />
-    </SafeAreaView>
+        <FlatList
+          data={watchlists || []}
+          renderItem={renderWatchlist}
+          keyExtractor={(item) => item?.id || Math.random().toString()}
+          contentContainerStyle={styles.listContainer}
+          ListEmptyComponent={() => (
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyTitle}>No watchlists yet</Text>
+              <Text style={styles.emptySubtitle}>
+                Create your first watchlist by adding a stock
+              </Text>
+            </View>
+          )}
+          showsVerticalScrollIndicator={false}
+        />
+      </View>
+    </>
   );
 };
 
@@ -189,13 +202,13 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff", // cyan accent
     borderBottomWidth: 3,
     borderBottomColor: "#000",
-    // removed boxShadow for simplicity
+    borderRadius: 5,
   },
   watchlistSection: {
     backgroundColor: "#FFFFFF",
     borderWidth: 2,
     borderColor: "#000",
-    borderRadius: 0,
+    borderRadius: 6,
     marginBottom: 16,
   },
   watchlistHeader: {
@@ -204,6 +217,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 16,
     backgroundColor: "#00BBF9", // cyan accent
+    borderRadius: 5,
     borderBottomWidth: 3,
     borderBottomColor: "#000",
   },
@@ -255,7 +269,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF", // white background
     borderWidth: 2,
     borderColor: "#000",
-    borderRadius: 0,
+    borderRadius: 5,
     padding: 16,
     marginBottom: 12,
   },
@@ -286,7 +300,7 @@ const styles = StyleSheet.create({
     borderColor: "#000",
     paddingHorizontal: 12,
     paddingVertical: 8,
-    borderRadius: 0,
+    borderRadius: 5,
     marginRight: 8,
   },
   viewButtonText: {
@@ -298,7 +312,7 @@ const styles = StyleSheet.create({
   removeButton: {
     width: 40,
     height: 40,
-    borderRadius: 0,
+    borderRadius: 5,
     backgroundColor: "#000", // black for remove button for strong contrast
     justifyContent: "center",
     alignItems: "center",

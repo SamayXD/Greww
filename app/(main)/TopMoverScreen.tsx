@@ -11,7 +11,10 @@ import {
   Pressable,
 } from "react-native";
 import { useTopMovers } from "../../src/hooks/useStockData";
-import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import { router } from "expo-router";
 
 const { width } = Dimensions.get("window");
@@ -101,7 +104,7 @@ const TopMoverScreen = () => {
   if (error) {
     return (
       <SafeAreaView style={styles.container}>
-        <Text style={styles.errorText}>⚠ Unable to load data</Text>
+        <Text style={styles.errorText}>Unable to load data</Text>
       </SafeAreaView>
     );
   }
@@ -116,7 +119,7 @@ const TopMoverScreen = () => {
   const isLosersCollapsed = viewMode === "gainers";
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={[styles.container, { paddingTop: useSafeAreaInsets().top }]}>
       {/* Header */}
       <View style={styles.topBar}>
         <Text style={styles.title}>Top Movers</Text>
@@ -162,7 +165,7 @@ const TopMoverScreen = () => {
           contentContainerStyle={styles.listContent}
         />
       )}
-    </SafeAreaView>
+    </View>
   );
 };
 
@@ -205,6 +208,7 @@ const styles = StyleSheet.create({
     borderColor: "#000",
     backgroundColor: "#fff",
     boxShadow: "3px 2px 0px #000",
+    borderRadius: 5,
   },
   cardPressedPositive: { backgroundColor: "rgba(54, 234, 102, 0.6)" },
   cardPressedNegative: { backgroundColor: "rgba(255, 59, 48, 0.6)" },
